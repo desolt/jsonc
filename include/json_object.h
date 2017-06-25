@@ -1,7 +1,7 @@
 #ifndef JSONC_JSON_OBJECT_H_
 #define JSONC_JSON_OBJECT_H_
 
-#include "json_value.h"
+typedef struct json_value json_value_t;
 
 struct json_val_node {
     char *key;

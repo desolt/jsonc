@@ -1,6 +1,7 @@
 #ifndef JSONC_JSON_VALUE_H_
 #define JSONC_JSON_VALUE_H_
 
+#include "json_object.h"
 #include <stdint.h>
 
 typedef enum {
@@ -18,7 +19,7 @@ typedef struct json_value {
     float num_val;
     char *str_val;
     uint8_t bool_val;
-    // TODO: Implement JSON array.
+    json_object_t *obj_val;
     // TODO: Implement JSON object.
 } json_value_t;
 
@@ -29,6 +30,7 @@ void free_json_value(json_value_t *val);
 json_value_t *json_value_str(const char *str);
 json_value_t *json_value_int(int num);
 json_value_t *json_value_float(float num);
+json_value_t *json_value_obj(json_object_t *obj);
 // TODO: Implement helper functions for JSON arrays and objects.
 
 #endif // JSONC_JSON_VALUE_H_

@@ -1,4 +1,4 @@
-#include "json_value.h"
+#include "json.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -56,6 +56,17 @@ json_value_t *json_value_float(float num) {
 
     val->val_type = json_num;
     val->num_val = num;
+
+    return val;
+}
+
+json_value_t *json_value_obj(json_object_t *obj)
+{
+    json_value_t *val = malloc(sizeof(json_value_t));
+    if (val == NULL) return NULL;
+
+    val->val_type = json_obj;
+    val->obj_val = obj;
 
     return val;
 }
