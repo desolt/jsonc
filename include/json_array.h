@@ -1,14 +1,14 @@
 #ifndef JSONC_JSON_ARRAY_H_
 #define JSONC_JSON_ARRAY_H_
 
-#include "json_value.h"
+#include "json.h"
 #include <stddef.h>
 
-typedef struct json_array {
+struct json_array {
     json_value_t **values;
 
     size_t capacity, size;
-} json_array_t;
+};
 
 json_array_t *init_json_array();
 void free_json_array(json_array_t *arr);

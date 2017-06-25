@@ -1,8 +1,10 @@
 #ifndef JSONC_JSON_VALUE_H_
 #define JSONC_JSON_VALUE_H_
 
-#include "json_object.h"
+#include "json.h"
+
 #include <stdint.h>
+#include <string.h>
 
 typedef enum {
     json_num = 1,
@@ -13,15 +15,15 @@ typedef enum {
     json_null = 6
 } value_type;
 
-typedef struct json_value {
+struct json_value {
     value_type val_type;
 
     float num_val;
     char *str_val;
     uint8_t bool_val;
     json_object_t *obj_val;
-    // TODO: Implement JSON object.
-} json_value_t;
+    json_array_t *arr_val;
+};
 
 json_value_t *create_json_value();
 // JSON values automatically free their values. They will try to act self-containing.
@@ -31,6 +33,9 @@ json_value_t *json_value_str(const char *str);
 json_value_t *json_value_int(int num);
 json_value_t *json_value_float(float num);
 json_value_t *json_value_obj(json_object_t *obj);
-// TODO: Implement helper functions for JSON arrays and objects.
+json_value_t *json_value_arr(json_array_t *arr);
+
+/* len is set to the number of characters in the string buffer */
+int json_value_to_str(json_value_t *val, char *buffer);
 
 #endif // JSONC_JSON_VALUE_H_

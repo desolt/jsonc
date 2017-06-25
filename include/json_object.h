@@ -1,7 +1,7 @@
 #ifndef JSONC_JSON_OBJECT_H_
 #define JSONC_JSON_OBJECT_H_
 
-typedef struct json_value json_value_t;
+#include "json.h"
 
 struct json_val_node {
     char *key;
@@ -10,9 +10,9 @@ struct json_val_node {
     struct json_val_node *next, *prev;
 };
 
-typedef struct json_object {
+struct json_object {
     struct json_val_node *node;
-} json_object_t;
+};
 
 json_object_t *init_json_object();
 void free_json_object(json_object_t *obj);
