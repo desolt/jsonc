@@ -1,5 +1,6 @@
 #include "json.h"
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 json_object_t *init_json_object()
@@ -76,4 +77,29 @@ json_value_t *json_object_get(json_object_t *obj, const char *key) {
     }
 
     return node->val;
+}
+
+int json_object_to_str(json_object_t *obj, char *buffer) {
+    *buffer++ = '{';
+
+    struct json_val_node *node = obj->node;
+    while (node != NULL) {
+        sprintf(buffer, "\"%s\"", node->key);
+        buffer += strlen(buffer);
+        *buffer++ = ':';
+        *buffer++ = ' ';
+
+        json_value_to_str(node->val, buffer);
+        buffer += strlen(buffer);
+
+        if (node->next) {
+            *buffer++ = ',';
+        }
+        node = node->next;
+    }
+
+    *buffer++ = '}';
+    *buffer = '\0';
+
+    return !0;
 }

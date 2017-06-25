@@ -56,6 +56,7 @@ int json_array_add(json_array_t *arr, json_value_t *val)
     }
 
     arr->values[arr->size++] = val;
+    return !0;
 }
 
 json_value_t *json_array_get(json_array_t *arr, size_t index)
@@ -65,4 +66,23 @@ json_value_t *json_array_get(json_array_t *arr, size_t index)
     }
 
     return arr->values[index];
+}
+
+int json_array_to_str(json_array_t *arr, char *buffer)
+{
+    *buffer++ = '[';
+    for (size_t i = 0; i < arr->size; i++) {
+        json_value_t *val = arr->values[i];
+        int success = json_value_to_str(val, buffer);
+        if (!success) return success;
+        buffer += strlen(buffer);
+        if (i + 1 < arr->size) {
+            *buffer++ = ',';
+        }
+    }
+
+    *buffer++ = ']';
+    *buffer = '\0';
+
+    return !0;
 }

@@ -23,6 +23,10 @@ int main(void)
     printf("test: %s\n", json_object_get(obj, "test")->str_val);
     printf("testnum: %f\n", json_object_get(obj, "testnum")->num_val);
 
+    char buffer[2048];
+    json_object_to_str(obj, buffer);
+    printf("%s\n", buffer);
+
     free_json_object(obj);
     return EXIT_SUCCESS;
 }

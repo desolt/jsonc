@@ -20,4 +20,6 @@ void free_json_object(json_object_t *obj);
 void json_object_put(json_object_t *obj, const char *key, json_value_t *val);
 json_value_t *json_object_get(json_object_t *obj, const char *key);
 
+int json_object_to_str(json_object_t *obj, char *buffer);
+
 #endif // JSONC_JSON_OBJECT_H_

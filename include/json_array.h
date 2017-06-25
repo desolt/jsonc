@@ -16,4 +16,6 @@ void free_json_array(json_array_t *arr);
 int json_array_add(json_array_t *arr, json_value_t *val);
 json_value_t *json_array_get(json_array_t *arr, size_t index);
 
+int json_array_to_str(json_array_t *arr, char *buffer);
+
 #endif // JSONC_JSON_ARRAY_H_

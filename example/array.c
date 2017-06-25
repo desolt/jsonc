@@ -2,6 +2,13 @@
 #include <stdio.h>
 #include <jsonc/json.h>
 
+void print_arr(json_array_t *arr)
+{
+    char buffer[1024];
+    json_array_to_str(arr, buffer);
+    printf("%s\n", buffer);
+}
+
 int main(void)
 {
     json_array_t *arr1 = init_json_array();
@@ -16,6 +23,7 @@ int main(void)
         }
     }
 
+    print_arr(arr1);
     free_json_array(arr1);
 
     json_array_t *arr2 = init_json_array();
@@ -28,6 +36,7 @@ int main(void)
         }
     }
 
+    print_arr(arr2);
     free_json_array(arr2);
     return EXIT_SUCCESS;
 }
