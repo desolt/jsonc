@@ -7,7 +7,8 @@
 #include <string.h>
 
 typedef enum {
-    json_num = 1,
+    json_int = 0,
+    json_float = 1,
     json_str = 2,
     json_bool = 3,
     json_arr = 4,
@@ -18,7 +19,8 @@ typedef enum {
 struct json_value {
     value_type val_type;
 
-    float num_val;
+    int int_val;
+    float float_val;
     char *str_val;
     uint8_t bool_val;
     json_object_t *obj_val;

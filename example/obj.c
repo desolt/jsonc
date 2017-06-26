@@ -8,9 +8,11 @@ int main(void)
     json_object_t *obj = init_json_object();
     json_value_t *test = json_value_str("this is a test");
     json_value_t *testnum = json_value_int(3);
+    json_value_t *testfloat = json_value_float(3.145);
 
     json_object_put(obj, "test", test);
     json_object_put(obj, "testnum", testnum);
+    json_object_put(obj, "testfloat", testfloat);
 
     /**
     struct json_val_node *node = obj->node;
@@ -19,9 +21,6 @@ int main(void)
         node = node->next;
     }
     */
-
-    printf("test: %s\n", json_object_get(obj, "test")->str_val);
-    printf("testnum: %f\n", json_object_get(obj, "testnum")->num_val);
 
     char buffer[2048];
     json_object_to_str(obj, buffer);

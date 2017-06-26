@@ -20,9 +20,10 @@ void free_json_value(json_value_t *val)
         case json_str:
             free(val->str_val);
             break;
-        // TODO: Free JSON object or array when implemented.
         case json_obj:
+            free_json_object(val->obj_val);
         case json_arr:
+            free_json_array(val->arr_val);
         default:
             break;
     }
@@ -43,15 +44,21 @@ json_value_t *json_value_str(const char *str)
 }
 
 json_value_t *json_value_int(int num) {
-    return json_value_float((float) num);
+    json_value_t *val = malloc(sizeof(json_value_t));
+    if (val == NULL) return NULL;
+
+    val->val_type = json_int;
+    val->int_val = num;
+
+    return val;
 }
 
 json_value_t *json_value_float(float num) {
     json_value_t *val = malloc(sizeof(json_value_t));
     if (val == NULL) return NULL;
 
-    val->val_type = json_num;
-    val->num_val = num;
+    val->val_type = json_float;
+    val->float_val = num;
 
     return val;
 }
@@ -81,8 +88,11 @@ json_value_t *json_value_arr(json_array_t *arr)
 int json_value_to_str(json_value_t *val, char *buffer)
 {
     switch (val->val_type) {
-    case json_num:
-        sprintf(buffer, "%f", val->num_val);
+    case json_int:
+        sprintf(buffer, "%d", val->int_val);
+        break;
+    case json_float:
+        sprintf(buffer, "%g", val->float_val);
         break;
     case json_str:
         sprintf(buffer, "\"%s\"", val->str_val);
@@ -90,8 +100,12 @@ int json_value_to_str(json_value_t *val, char *buffer)
     case json_bool:
         strcpy(buffer, val->bool_val ? "true" : "false");
         break;
-    case json_arr: // TODO: Implement array tostring.
-    case json_obj: // TODO: Implement object tostring.
+    case json_arr:
+        json_array_to_str(val->arr_val, buffer);
+        break;
+    case json_obj:
+        json_object_to_str(val->obj_val, buffer);
+        break;
     case json_null:
     default:
         strcpy(buffer, "null");
