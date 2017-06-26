@@ -37,6 +37,8 @@ int main(void)
     print_arr(arr2);
     json_array_set(arr2, 4, json_value_str("Test!"));
     print_arr(arr2);
+    json_array_add_at(arr2, 3, json_value_str("insert insert"));
+    print_arr(arr2);
 
     free_json_array(arr2);
     return EXIT_SUCCESS;

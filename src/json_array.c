@@ -50,11 +50,13 @@ int json_array_resize(json_array_t *arr, size_t capacity)
 
 int json_array_add(json_array_t *arr, json_value_t *val)
 {
-    if (arr->size + 1 > arr->capacity) {
-        int success = json_array_resize(arr, arr->capacity + 2);
+    if (arr->size <= arr->capacity) {
+        int success = json_array_resize(arr, arr->capacity + 3);
         if (!success) {
             return success;
         }
+
+        arr->capacity += 3;
     }
 
     arr->values[arr->size++] = val;
@@ -91,6 +93,23 @@ int json_array_remove(json_array_t *arr, size_t index)
     memmove(&(arr->values[index]), &(arr->values[index + 1]), sizeof(json_array_t *) * (arr->size - index));
     arr->size--;
 
+    return !0;
+}
+
+int json_array_add_at(json_array_t *arr, size_t index, json_value_t *val)
+{
+    if (arr->size <= arr->capacity) {
+        int success = json_array_resize(arr, arr->capacity + 3);
+        if (!success) {
+            return success;
+        }
+
+        arr->capacity += 3;
+    }
+
+    memmove(&(arr->values[index + 1]), &(arr->values[index]), (arr->size - index) * sizeof(val));
+    arr->values[index] = val;
+    arr->size++;
     return !0;
 }
 
