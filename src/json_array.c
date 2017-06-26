@@ -20,6 +20,8 @@ json_array_t *init_json_array()
 
 void free_json_array(json_array_t *arr)
 {
+    if (arr == NULL) return;
+
     for (size_t i = 0; i < arr->size; i++) {
         free_json_value(arr->values[i]);
     }

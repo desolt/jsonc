@@ -18,11 +18,37 @@ int main(void)
         printf("%f\n", fnum);
     }
 
-    json_value_t *val = json_gets("{\"test\": \"Hello, world!\", \"test_num\": 53, \"test_obj\": {\"word\": \"testing!\"}}");
+    json_value_t *val = json_gets("{\"test\": \"Hello, world!\", \"test_num\": 53, \"test_obj\": {\"word\": \"testing!\"}, \"friends\": [\"Bob\", \"Jim\", \"Foo\"]}");
+    json_value_t *val_arr =  json_gets("[\"test1\", \"test2\", \"test3\"]");
+    if (val_arr != NULL) {
+        printf("%d\n", val_arr->val_type);
+        for (size_t i = 0; i < val_arr->arr_val->size; i++) {
+            printf("%s\n", json_array_get(val_arr->arr_val, i)->str_val);
+        }
+    }
+
     if (val != NULL) {
         json_value_t *test = json_object_get(val->obj_val, "test");
         printf("%s\n", test->str_val);
+        json_value_t *test_num = json_object_get(val->obj_val, "test_num");
+        printf("%d\n", test_num->int_val);
+        json_value_t *word = json_object_get(json_object_get(val->obj_val, "test_obj")->obj_val, "word");
+        printf("%s\n", word->str_val);
+
+        
+        json_value_t *friends = json_object_get(val->obj_val, "friends");
+        if (friends != NULL) {
+            printf("%d\n", friends->val_type);
+            for (size_t i = 0; i < friends->arr_val->size; i++) {
+                printf("%s\n", json_array_get(friends->arr_val, i)->str_val);
+            }
+        } else {
+            printf("null!\n");
+        }
     }
+
+    free_json_value(val_arr);
+    free_json_value(val);
 
     return EXIT_SUCCESS;
 }

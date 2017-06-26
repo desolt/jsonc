@@ -2,7 +2,6 @@
 #include <ctype.h>
 #include <errno.h>
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 
 char *parse_str(const char *src, size_t *len)
@@ -78,6 +77,74 @@ value_type parse_num(const char *src, int *out_int, float *out_float, size_t *le
     return json_null;
 }
 
+json_value_t *parse_val(const char *src, const char **ptr)
+{
+    json_value_t *val = malloc(sizeof(json_value_t));
+
+    while (*src == ' ') ++src; // Ignore whitespace
+
+    char c = *src;
+    if (c == '{') {
+        val->val_type = json_obj;
+        val->obj_val = parse_json_obj(src, &src);
+
+        if (val->obj_val == NULL) {
+            free(val);
+            return NULL;
+        }
+
+        if (src + 1 != NULL) ++src;
+    } else if (c == '[') {
+        val->val_type = json_arr;
+        val->arr_val = parse_json_arr(src, &src);
+
+        if (val->arr_val == NULL) {
+            free(val);
+            return NULL;
+        }
+    } else if (isdigit(c) || c == '.') {
+        float fnum;
+        int inum;
+
+        size_t len;
+        value_type vt = parse_num(src, &inum, &fnum, &len);
+        if (vt == json_null) {
+            free(val);
+            return NULL;
+        } else if (vt == json_float) {
+            val->float_val = fnum;
+        } else {
+            val->int_val = inum;
+        }
+
+        val->val_type = vt;
+
+        src += len;
+    } else if (c == '"') {
+        val->val_type = json_str;
+        size_t len;
+        val->str_val = parse_str(src, &len);
+        if (val->str_val == NULL) {
+            free(val);
+            return NULL;
+        }
+
+        src += len + 1;
+    } else if (isalpha(c)) {
+        if (!strcmp(src, "null")) {
+            val->val_type = json_null;
+        } else {
+            free(val);
+            return NULL;
+        }
+    }
+
+    if (ptr != NULL) *ptr = src;
+
+    return val;
+
+}
+
 json_object_t *parse_json_obj(const char *src, const char **ptr)
 {
     while (*src == ' ') ++src;
@@ -87,8 +154,6 @@ json_object_t *parse_json_obj(const char *src, const char **ptr)
     json_object_t *obj = init_json_object();
 
     while (src != NULL) {
-        while (*src == ' ') ++src;
-
         if (*src == '"') {
             size_t key_len;
             char *key = parse_str(src, &key_len);
@@ -109,72 +174,8 @@ json_object_t *parse_json_obj(const char *src, const char **ptr)
             ++src;
             while (*src == ' ') ++src;
 
-            json_value_t *val = malloc(sizeof(json_value_t));
-            if (*src == '"') {
-                val->val_type = json_str;
-                size_t len;
-                char *buf = parse_str(src, &len);
-                if (buf == NULL) {
-                    free(val);
-                    free_json_object(obj);
-                    return NULL;
-                }
-
-                val->str_val = buf;
-                src += len + 1;
-            } else if (isdigit(*src) || *src == '.') {
-                float fnum; int inum;
-                size_t len;
-                value_type vt = parse_num(src, &inum, &fnum, &len);
-                if (vt == json_null) {
-                    free(val);
-                    free_json_object(obj);
-                    return NULL;
-                } else if (vt == json_float) {
-                    val->float_val = fnum;
-                } else {
-                    val->int_val = inum;
-                }
-
-                val->val_type = vt;
-                src += len;
-            } else if (*src == '{') {
-                val->val_type = json_obj;
-                json_object_t *obj_val = parse_json_obj(src, &src);
-                if (obj_val == NULL) {
-                    free_json_object(obj);
-                    free(val);
-                    return NULL;
-                }
-
-                val->obj_val = obj_val;
-            } else if (*src == '[') {
-                // TODO: Implement array support
-            } else if (*src == 'n') {
-                if (!strncmp(src, "null", sizeof(char) * 4)) {
-                    val->val_type = json_null;
-                    src += 4;
-                } else {
-                    free(val);
-                    free_json_object(obj);
-                    return NULL;
-                }
-            } else if (*src == 't' || *src == 'f') {
-                val->val_type = json_bool;
-
-                if (!strncmp(src, "true", sizeof(char) * 4)) {
-                    val->bool_val = !0;
-                    src += 4;
-                } else if (!strncmp(src, "false", sizeof(char) * 5)) {
-                    val->bool_val = 0;
-                    src += 5;
-                } else {
-                    free(val);
-                    free_json_object(obj);
-                    return NULL;
-                }
-            } else {
-                free(val);
+            json_value_t *val = parse_val(src, &src);
+            if (val == NULL) {
                 free_json_object(obj);
                 return NULL;
             }
@@ -197,62 +198,35 @@ json_object_t *parse_json_obj(const char *src, const char **ptr)
 
 json_array_t *parse_json_arr(const char *src, const char **ptr)
 {
-    return NULL;
+    while (*src == ' ') ++src;
+    if (*src != '[') return NULL;
+    ++src;
+
+    json_array_t *arr = init_json_array();
+    while (src != NULL) {
+        while (*src == ' ') ++src;
+
+        if (*src == ']') {
+            break;
+        } else if (*src == '"' || *src == '.' || *src == '{' || *src == '[' || isdigit(*src)) {
+            json_value_t *val = parse_val(src, &src);
+            if (val == NULL) {
+                free_json_array(arr);
+                return NULL;
+            }
+
+            json_array_add(arr, val);
+            continue;
+        }
+
+        ++src;
+    }
+
+    if (ptr != NULL) *ptr = src;
+    return arr;
 }
 
 json_value_t *json_gets(const char *src)
 {
-    json_value_t *val = malloc(sizeof(json_value_t));
-
-    while (*src == ' ') ++src; // Ignore whitespace
-
-    char c = *src;
-    if (c == '{') {
-        val->val_type = json_obj;
-        val->obj_val = parse_json_obj(src, NULL);
-
-        if (val->obj_val == NULL) {
-            free(val);
-            return NULL;
-        }
-    } else if (c == '[') {
-        val->val_type = json_arr;
-        val->arr_val = parse_json_arr(src, NULL);
-
-        if (val->arr_val == NULL) {
-            free(val);
-            return NULL;
-        }
-    } else if (isdigit(c) || c == '.') {
-        float fnum;
-        int inum;
-
-        value_type vt = parse_num(src, &inum, &fnum, NULL);
-        if (vt == json_null) {
-            free(val);
-            return NULL;
-        } else if (vt == json_float) {
-            val->float_val = fnum;
-        } else {
-            val->int_val = inum;
-        }
-
-        val->val_type = vt;
-    } else if (c == '"') {
-        val->val_type = json_str;
-        val->str_val = parse_str(src, NULL);
-        if (val->str_val == NULL) {
-            free(val);
-            return NULL;
-        }
-    } else if (isalpha(c)) {
-        if (!strcmp(src, "null")) {
-            val->val_type = json_null;
-        } else {
-            free(val);
-            return NULL;
-        }
-    }
-
-    return val;
+    return parse_val(src, NULL);
 }
