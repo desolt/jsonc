@@ -23,7 +23,7 @@ void free_json_array(json_array_t *arr)
     if (arr == NULL) return;
 
     for (size_t i = 0; i < arr->size; i++) {
-        free_json_value(arr->values[i]);
+        if (arr->values[i] != NULL) free_json_value(arr->values[i]);
     }
 
     free(arr->values);
@@ -68,6 +68,30 @@ json_value_t *json_array_get(json_array_t *arr, size_t index)
     }
 
     return arr->values[index];
+}
+
+int json_array_set(json_array_t *arr, size_t index, json_value_t *val)
+{
+    if (index >= arr->size) {
+        return 0;
+    }
+
+    free_json_value(arr->values[index]);
+    arr->values[index] = val;
+    return !0;
+}
+
+int json_array_remove(json_array_t *arr, size_t index)
+{
+    if (index >= arr->size) {
+        return 0;
+    }
+
+    free_json_value(arr->values[index]);
+    memmove(&(arr->values[index]), &(arr->values[index + 1]), sizeof(json_array_t *) * (arr->size - index));
+    arr->size--;
+
+    return !0;
 }
 
 int json_array_to_str(json_array_t *arr, char *buffer)
